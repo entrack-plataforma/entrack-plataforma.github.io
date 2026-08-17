@@ -37,7 +37,23 @@ Use `DASHBOARD_VERSION`, `BACKEND_VERSION`, and `RECEIVER_VERSION` to choose the
 application versions. For production, use fixed release tags instead of
 `latest`.
 
-Configure the relevant SMTP, Firebase, SMS, geocoder, geolocation, openai, google maps in `.env`
+## External services
+
+Before starting the platform, arrange access to these external services and add
+their credentials to `.env`:
+
+| Service | Used for |
+| --- | --- |
+| PostgreSQL | Application and tracking data |
+| OpenAI API | AI features |
+| Google Maps Platform | Maps and location features |
+| Geocoding provider | Converting coordinates into addresses |
+| Network geolocation provider | Locating devices from mobile network data |
+| SMTP server | Email notifications |
+| Firebase | Push notifications |
+| SMS HTTP provider | SMS notifications |
+
+MediaMTX is only required if you use camera streaming.
 
 ## Camera streaming
 
@@ -48,7 +64,7 @@ receiver receive these values through the common environment.
 ## Device ports
 
 The receiver publishes TCP and UDP ports `5000-5300`. You can reduce
-this range to only the protocols their devices use. For example, GT06 uses
+this range to only the protocols your devices use. For example, GT06 uses
 5023 and Teltonika uses 5027 in the supplied receiver configuration.
 
 ## Operations
