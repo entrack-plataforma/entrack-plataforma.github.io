@@ -64,6 +64,8 @@ services:
     image: ghcr.io/entrack-plataforma/traccar:${RECEIVER_VERSION:-latest}
     restart: unless-stopped
     environment: *common-environment
+    expose:
+      - "8082"
     volumes:
       - receiver_logs:/opt/traccar/logs
       - receiver_media:/opt/traccar/media
