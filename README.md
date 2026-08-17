@@ -45,10 +45,6 @@ Set `MEDIAMTX_WEBRTC_URL`, `MEDIAMTX_RTMP_URL`, and optionally
 `MEDIAMTX_RTSP_URL` to the external service endpoints. The business backend and
 receiver receive these values through the common environment.
 
-```sh
-printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USER --password-stdin
-```
-
 ## Device ports
 
 The receiver publishes TCP and UDP ports `5000-5300`. You can reduce
