@@ -9,6 +9,9 @@ x-common-environment: &common-environment
   DB_SSL_MODE: ${DB_SSL_MODE:-require}
   OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY in .env}
   GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:?Set GOOGLE_MAPS_API_KEY in .env}
+  MEDIAMTX_WEBRTC_URL: ${MEDIAMTX_WEBRTC_URL:?Set MEDIAMTX_WEBRTC_URL in .env}
+  MEDIAMTX_RTMP_URL: ${MEDIAMTX_RTMP_URL:?Set MEDIAMTX_RTMP_URL in .env}
+  MEDIAMTX_RTSP_URL: ${MEDIAMTX_RTSP_URL:-}
   JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx1g}
   APP_URL: ${APP_URL:?Set APP_URL in .env}
   SMTP_HOST: ${SMTP_HOST:-}
@@ -49,15 +52,22 @@ services:
     volumes:
       - receiver_logs:/opt/traccar/logs
       - receiver_media:/opt/traccar/media
+      - receiver_data:/opt/traccar/data
     ports:
       - "5000-5250:5000-5250/tcp"
       - "5000-5250:5000-5250/udp"
+      - "5500-6000:5500-6000/tcp"
+      - "5500-6000:5500-6000/udp"
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8082/api/server"]
-      interval: 15s
+      interval: 2m
       timeout: 5s
-      start_period: 60s
-      retries: 10
+      start_period: 1h
+      start_interval: 10s
+      retries: 3
+    stop_grace_period: 1m
+
 volumes:
   receiver_logs:
   receiver_media:
+  receiver_data:
