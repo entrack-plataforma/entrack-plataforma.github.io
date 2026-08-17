@@ -1,0 +1,63 @@
+name: entrack-plataforma
+
+x-common-environment: &common-environment
+  DB_HOST: ${DB_HOST:?Set DB_HOST in .env}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME:-entrack_plataforma}
+  DB_USER: ${DB_USER:?Set DB_USER in .env}
+  DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+  DB_SSL_MODE: ${DB_SSL_MODE:-require}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY in .env}
+  GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:?Set GOOGLE_MAPS_API_KEY in .env}
+  JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx1g}
+  APP_URL: ${APP_URL:?Set APP_URL in .env}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM: ${SMTP_FROM:-}
+  FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}
+  SMS_HTTP_URL: ${SMS_HTTP_URL:-}
+  SMS_HTTP_AUTHORIZATION: ${SMS_HTTP_AUTHORIZATION:-}
+  GEOCODER_URL: ${GEOCODER_URL:-http://backend:8080/reverse}
+  GEOLOCATION_KEY: ${GEOLOCATION_KEY:-}
+  GEOLOCATION_URL: ${GEOLOCATION_URL:-https://us1.unwiredlabs.com/v2/process}
+
+services:
+  dashboard:
+    image: ghcr.io/entrack-plataforma/traccar-dash:${DASHBOARD_VERSION:-latest}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      receiver:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  backend:
+    image: ghcr.io/entrack-plataforma/entrack-api:${BACKEND_VERSION:-latest}
+    restart: unless-stopped
+    environment: *common-environment
+    expose:
+      - "8080"
+
+  receiver:
+    image: ghcr.io/entrack-plataforma/traccar:${RECEIVER_VERSION:-latest}
+    restart: unless-stopped
+    environment: *common-environment
+    volumes:
+      - receiver_logs:/opt/traccar/logs
+      - receiver_media:/opt/traccar/media
+    ports:
+      - "5000-5250:5000-5250/tcp"
+      - "5000-5250:5000-5250/udp"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8082/api/server"]
+      interval: 15s
+      timeout: 5s
+      start_period: 60s
+      retries: 10
+volumes:
+  receiver_logs:
+  receiver_media:
