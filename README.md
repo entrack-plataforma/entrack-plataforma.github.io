@@ -37,7 +37,7 @@ Use `DASHBOARD_VERSION`, `BACKEND_VERSION`, and `RECEIVER_VERSION` to choose the
 application versions. For production, use fixed release tags instead of
 `latest`.
 
-Configure the relevant SMTP, Firebase, SMS, geocoder, geolocation, OpenID `.env`
+Configure the relevant SMTP, Firebase, SMS, geocoder, geolocation, openai, google maps in `.env`
 
 ## Camera streaming
 
