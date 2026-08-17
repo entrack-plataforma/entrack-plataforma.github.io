@@ -63,6 +63,3 @@ docker compose pull
 docker compose up -d
 docker compose down
 ```
-
-`docker compose down` keeps media and logs. Adding `--volumes` deletes those
-local volumes, but never deletes or manages the customer's external database.
