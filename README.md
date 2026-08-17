@@ -1,10 +1,8 @@
 # Entrack Plataforma deployment
 
-This template runs the dashboard, business backend, and custom receiver service
-behind one public web endpoint. It pulls the application images from GitHub
-Container Registry, so customers do not need the source repositories to launch
-it. The database is provided and managed by the customer; it is not part of
-this Compose project.
+This template runs the dashboard, business backend, and custom receiver behind
+an Nginx gateway on one public web endpoint. It pulls the application images
+from GitHub Container Registry.
 
 ## Start
 
@@ -32,9 +30,12 @@ accept Cloudflare traffic on port 80. GPS device ports must remain directly
 reachable and should use a DNS-only hostname because a standard Cloudflare DNS
 proxy does not carry arbitrary tracker TCP/UDP protocols.
 
-The dashboard uses the existing same-origin routes: `/api/*` and `/api/socket`
-go to the receiver, while `/functions/v1/*` goes to the business backend. This
-preserves the current `/functions/v1/reseller-api` contract. Set
+The gateway preserves the existing same-origin routes: `/api/*` and
+`/api/socket` go to the receiver, while `/functions/v1/*` and `/chatkit` go to
+the business backend. All other requests go to the dashboard. This preserves
+the current `/functions/v1/reseller-api` contract without requiring Cloudflare
+Pages Functions. Application logic previously implemented by those functions
+must be provided by the receiver or business backend. Set
 `DASHBOARD_VERSION`, `BACKEND_VERSION`, and `RECEIVER_VERSION` to published
 release tags. `latest` is convenient for evaluation, but immutable version tags
 are safer in production.
@@ -42,6 +43,19 @@ are safer in production.
 Receiver integrations are disabled by default. Configure the relevant SMTP,
 Firebase, SMS, geocoder, geolocation, OpenID, or forwarding values in `.env`
 before adding their notification types or changing their `*_ENABLE` flags.
+
+## Camera streaming
+
+MediaMTX is customer-managed and is not hosted by this Compose project. Set
+`MEDIAMTX_WEBRTC_URL`, `MEDIAMTX_RTMP_URL`, and optionally
+`MEDIAMTX_RTSP_URL` to the external service endpoints. The business backend and
+receiver receive these values through the common environment.
+
+The customer must configure MediaMTX networking, TLS, authentication, storage,
+and firewall access. A standard Cloudflare proxy does not carry RTMP, RTSP, or
+WebRTC UDP media traffic, so its media hostname normally needs to be DNS-only.
+Enter the same WebRTC and RTMP endpoints in the dashboard Camera Settings until
+the business backend exposes centralized runtime settings to the frontend.
 
 If either GitHub Container Registry package is private, authenticate once using
 a GitHub personal access token with `read:packages` before starting:
@@ -52,10 +66,10 @@ printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USER --passwor
 
 ## Device ports
 
-The template publishes TCP and UDP ports 5000-5250 so the protocols enabled in
-the current `traccar.xml` work without further setup. For an internet-facing
-host, reduce this to only the ports used by your devices. For example, GT06 is
-5023 and Teltonika is 5027 in the supplied configuration.
+Following the official Traccar Docker configuration, the receiver publishes
+TCP and UDP ports `5000-5300`. For an internet-facing host, customers can reduce
+this range to only the protocols their devices use. For example, GT06 uses
+5023 and Teltonika uses 5027 in the supplied receiver configuration.
 
 ## Operations
 
